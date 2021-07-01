@@ -1,0 +1,48 @@
+﻿@model PagedList.IPagedList<CoinRate.Models.Currency>
+@using PagedList.Mvc
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Home";
+}
+
+@*Поле поиска*@
+@using (Html.BeginForm("Index", "Home", FormMethod.Get))
+{
+    <p>
+        Найти: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+        <input type="submit" value="Search" />
+    </p>
+}
+
+@*Таблица с котировками криптовалют*@
+<table class="table table-hover">
+    <caption>Котировки криптовалют</caption>
+    <tr>
+        <th>@Html.ActionLink("Название", "Index", new { sortOrder = ViewBag.NameSortParm })</th>
+        <th>@Html.ActionLink("Символ", "Index")</th>
+        <th>@Html.ActionLink("Логотип", "Index")</th>
+        <th>@Html.ActionLink("Текущая цена (USD)", "Index", new { sortOrder = ViewBag.PriceSortParm })</th>
+        <th>@Html.ActionLink("Изменение за 1 час (%)", "Index", new { sortOrder = ViewBag.Persent1hSortParm })</th>
+        <th>@Html.ActionLink("Изменение за 24 часа (%)", "Index", new { sortOrder = ViewBag.Persent24hSortParm })</th>
+        <th>@Html.ActionLink("Капитализация", "Index", new { sortOrder = ViewBag.MarketCapSortParm })</th>
+        <th>@Html.ActionLink("Время обновления данных", "Index", new { sortOrder = ViewBag.DateSortParm })</th>
+    </tr>
+    @foreach (var coin in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => coin.Name)</td>
+            <td>@Html.DisplayFor(modelItem => coin.Symbol)</td>
+            <td>@Html.DisplayFor(modelItem => coin.Logo)</td>
+            <td>@Html.DisplayFor(modelItem => coin.Price)</td>
+            <td>@Html.DisplayFor(modelItem => coin.PercentChange1h)</td>
+            <td>@Html.DisplayFor(modelItem => coin.PercentChange24h)</td>
+            <td>@Html.DisplayFor(modelItem => coin.MarketCup)</td>
+            <td>@Html.DisplayFor(modelItem => coin.LastUpdated)</td>
+        </tr>
+    }
+</table>
+@*Разбивка на страницы*@
+<br />
+Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+@Html.PagedListPager(Model, page => Url.Action("Index", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
