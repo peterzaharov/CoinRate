@@ -86,7 +86,9 @@ namespace CoinRate.Controllers
             int pageSize = 100;
             int pageNumber = (page ?? 1);
 
-            return View(sortedListCoins.ToPagedList(pageNumber, pageSize));
+            List<Currency> currencies = CoinMarketConnector.GetInfoAPI(sortedListCoins.ToList());
+
+            return View(currencies.ToPagedList(pageNumber, pageSize));
         }
     }
 }

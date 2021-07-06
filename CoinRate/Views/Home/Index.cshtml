@@ -33,7 +33,7 @@
         <tr>
             <td>@Html.DisplayFor(modelItem => coin.Name)</td>
             <td>@Html.DisplayFor(modelItem => coin.Symbol)</td>
-            <td>@Html.DisplayFor(modelItem => coin.Logo)</td>
+            <td><img src="@Html.DisplayFor(modelItem => coin.Logo)" width="32" height="32"/></td>
             <td>@Html.DisplayFor(modelItem => coin.Price)</td>
             <td>@Html.DisplayFor(modelItem => coin.PercentChange1h)</td>
             <td>@Html.DisplayFor(modelItem => coin.PercentChange24h)</td>

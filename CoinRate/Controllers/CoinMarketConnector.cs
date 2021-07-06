@@ -11,13 +11,17 @@ namespace CoinRate.Controllers
 {
     public class CoinMarketConnector
     {
-        private string API_KEY = "key";
+        private static string API_KEY = "c580e0f4-f480-4b81-bf64-9432b172c3a8";
         
         public List<Currency> coins = new List<Currency>();
         public CoinMarketConnector()
         {
             coins = GetCoins(MakeAPICall());
         }
+        /// <summary>
+        /// Получение котировок криптовалют
+        /// </summary>
+        /// <returns>Список котировок</returns>
         private string MakeAPICall()
         {
             var URL = new UriBuilder("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest");
@@ -35,10 +39,57 @@ namespace CoinRate.Controllers
             return client.DownloadString(URL.ToString());
         }
         /// <summary>
+        /// Получение логотипов криптовалют
+        /// </summary>
+        /// <param name="list">Список криптовалют, которые получаем из метода MakeAPICall</param>
+        /// <returns>Логотипы валют</returns>
+        public static List<Currency> GetInfoAPI(List<Currency> list)
+        {
+            List<Currency> result = new List<Currency>();
+            string ids = "";
+            
+            foreach (var item in list)
+            {
+                ids = ids + item.Id + ",";
+            }
+
+            var URL = new UriBuilder("https://pro-api.coinmarketcap.com/v1/cryptocurrency/info");
+
+            var queryString = HttpUtility.ParseQueryString(string.Empty);
+            queryString["id"] = ids.Remove(ids.Length - 1);
+            queryString["aux"] = "logo";
+
+            URL.Query = queryString.ToString();
+
+            var client = new WebClient();
+            client.Headers.Add("X-CMC_PRO_API_KEY", API_KEY);
+            client.Headers.Add("Accepts", "application/json");
+            string JSONResponse = client.DownloadString(URL.ToString());
+
+            JObject parsedResponse = JObject.Parse(JSONResponse);
+            JObject data = JObject.FromObject(parsedResponse["data"]);
+            List<JToken> items = data.Values().ToList();
+
+            Dictionary<string, string> imagesMap = new Dictionary<string, string>();
+
+            foreach (var i in items)
+            {
+                imagesMap.Add(i["id"].ToObject<string>(), i["logo"].ToObject<string>());
+            }
+
+            foreach (Currency currency in list)
+            {
+                currency.Logo = imagesMap[currency.Id];
+                result.Add(currency);
+            }
+            return result;
+        }
+        /// <summary>
         /// Получение списка криптовалют.
         /// </summary>
         /// <param name="JSONString">Список криптовалют</param>
         /// <returns>Список криптовалют</returns>
+        /// 
         private List<Currency> GetCoins(string JSONString)
         {
             List<Currency> result = new List<Currency>();
@@ -63,7 +114,7 @@ namespace CoinRate.Controllers
             decimal capitalizationUSD = Math.Round(item["quote"]["USD"]["market_cap"].ToObject<decimal>(), 3);
             DateTime lastUpdate = item["last_updated"].ToObject<DateTime>();
 
-            return new Currency(item["name"].ToObject<string>(), item["symbol"].ToObject<string>(), "some link", price, 
+            return new Currency(item["id"].ToObject<string>(), item["name"].ToObject<string>(), item["symbol"].ToObject<string>(), "some link", price, 
                                 changeHour, changeDay, capitalizationUSD, lastUpdate);
         }
     }
