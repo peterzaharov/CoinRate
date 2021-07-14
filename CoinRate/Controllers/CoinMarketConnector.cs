@@ -11,7 +11,7 @@ namespace CoinRate.Controllers
 {
     public class CoinMarketConnector
     {
-        private static string API_KEY = "c580e0f4-f480-4b81-bf64-9432b172c3a8";
+        private static string API_KEY = "key";
         
         public List<Currency> coins = new List<Currency>();
         public CoinMarketConnector()
